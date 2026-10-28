@@ -13,6 +13,15 @@
 
 ---
 
+## Milvus字段
+
+- name="id", dtype=DataType.INT64, is_primary=True, auto_id=True。
+- name="title", dtype=DataType.VARCHAR, max_length=200。
+- name="doc_id", dtype=DataType.VARCHAR, max_length=100。
+- name="content", dtype=DataType.VARCHAR, max_length=65535。
+- name="chunk_index", dtype=DataType.INT32。
+- name="vector", dtype=DataType.FLOAT_VECTOR, dim=1024。
+
 ## 运行
 运行run.py启动前端，
 访问http://127.0.0.1:8000/
@@ -22,12 +31,8 @@
 ### 功能一：知识问答
 
 ```
-用户问题 → embedding模型向量化 → Milvus 向量检索 Top3 → LLM 流式选最优并润色 → 前端边收边显示
+用户问题 → embedding模型向量化 → Milvus 向量检索知识库 Top3 → LLM 选最优并润色 → 前端流式输出展示
 ```
-
-接口为 `POST /api/ask/stream`（SSE）：先推送 `sources`（检索到的 Top3），再逐字推送 `token`，
-最后推送 `done`（含 `answer` / `best_rank`）。首字延迟 = 向量检索耗时 + LLM 首个 token，
-不必等全量答案生成完。`POST /api/ask` 仍保留为一次性返回的旧接口。
 
 ### 功能二：概念对比
 
@@ -46,13 +51,7 @@ Web Search Agent → DuckDuckGo 联网搜索补齐（最多 MAX_WEB_ROUNDS 轮�
     ↓
 Synthesize → 生成 summary_a / summary_b / 区别说明
     ↓
-前端展示执行轨迹 + 对比结论
+前端展示对比结论
 ```
 
 ---
-
-## 注意事项
-
-- Milvus 集合的索引度量类型必须与 `ASKAI_MILVUS_METRIC` 一致（当前为 `L2`）。
-- `qwen2.5:1.5b` 模型较小，JSON 输出偶有格式偏差，代码已做容错处理。
-- 联网搜索优先使用 DuckDuckGo lite 端点；若网络受限，会自动降级为仅用笔记对比。
