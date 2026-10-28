@@ -1,5 +1,3 @@
-"""Milvus dense retrieval over the existing learning-notes collection."""
-
 from __future__ import annotations
 
 import time

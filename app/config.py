@@ -1,5 +1,3 @@
-"""Runtime configuration. Override any value with environment variables."""
-
 from __future__ import annotations
 
 import os

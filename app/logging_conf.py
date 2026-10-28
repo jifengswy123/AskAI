@@ -1,10 +1,3 @@
-"""Central logging setup for the AskAI service.
-
-Every module logs through ``get_logger`` so the whole request path (user input,
-Milvus retrieval, LLM calls, web search) shows up in one consistent format.
-Set ``ASKAI_LOG_LEVEL=DEBUG`` to see full prompts and raw model output.
-"""
-
 from __future__ import annotations
 
 import logging

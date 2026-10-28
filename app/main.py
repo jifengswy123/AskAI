@@ -1,5 +1,3 @@
-"""FastAPI entrypoint: Q&A, concept comparison, and a small frontend."""
-
 from __future__ import annotations
 
 import json

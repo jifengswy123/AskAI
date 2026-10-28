@@ -1,5 +1,3 @@
-"""Feature 1: retrieve top-3 notes, let the LLM pick, polish, and summarize."""
-
 from __future__ import annotations
 
 import re

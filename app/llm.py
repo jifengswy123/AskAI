@@ -1,5 +1,3 @@
-"""Thin OpenAI-compatible client for the local Ollama chat model."""
-
 from __future__ import annotations
 
 import json

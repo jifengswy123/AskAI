@@ -1,10 +1,3 @@
-"""Web search tool used when Milvus notes are not enough.
-
-Uses direct HTTP requests to DuckDuckGo's lite endpoint (more reliable than
-the ddgs library backends from networks where Yahoo routing is blocked).
-Falls back to the ddgs library if the direct request fails.
-"""
-
 from __future__ import annotations
 
 import re
