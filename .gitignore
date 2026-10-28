@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.idea/
+.vscode/
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.env

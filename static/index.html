@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AskAI 学习笔记问答</title>
+</head>
+<body>
+  <h1>AskAI 学习笔记问答</h1>
+
+  <h2>知识问答</h2>
+  <form id="qa-form">
+    <p>
+      <label for="question">你的问题</label><br />
+      <textarea id="question" rows="4" cols="70" placeholder="例如：我想知道如何安装 docker"></textarea>
+    </p>
+    <button type="submit">提问</button>
+  </form>
+  <p id="qa-status"></p>
+
+  <div id="qa-answer" hidden>
+    <h3>回答</h3>
+    <div id="qa-text"></div>
+  </div>
+
+  <hr />
+
+  <h2>概念对比</h2>
+  <form id="cmp-form">
+    <p>
+      <label for="term-a">专有名词 A</label>
+      <input id="term-a" size="24" placeholder="例如：Agent Skill" />
+      &nbsp;vs&nbsp;
+      <label for="term-b">专有名词 B</label>
+      <input id="term-b" size="24" placeholder="例如：MCP Tool" />
+    </p>
+    <button type="submit">对比</button>
+  </form>
+  <p id="cmp-status"></p>
+
+  <div id="cmp-answer" hidden>
+    <h3 id="sum-a-title">A</h3>
+    <p id="sum-a"></p>
+    <h3 id="sum-b-title">B</h3>
+    <p id="sum-b"></p>
+    <h3>区别</h3>
+    <p id="cmp-text"></p>
+    <h3>网页来源</h3>
+    <div id="cmp-web"></div>
+  </div>
+
+  <script src="/static/app.js?v=4"></script>
+</body>
+</html>
