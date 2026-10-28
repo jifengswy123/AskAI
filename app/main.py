@@ -18,9 +18,9 @@ from app.qa import answer_question, answer_question_stream
 
 log = get_logger("api")
 
-STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+STATIC_DIR = Path(__file__).resolve().parent.parent / "web_page"
 
-# CORS: allow the separated Vue frontend (dev server + built static) to call the API.
+# CORS: allow the separated Vue frontend (dev server + built web_page) to call the API.
 CORS_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -46,7 +46,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/web_page", StaticFiles(directory=STATIC_DIR), name="web_page")
 
 
 class QuestionIn(BaseModel):
