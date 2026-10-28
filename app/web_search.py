@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 import time
 from dataclasses import dataclass
@@ -35,19 +33,19 @@ def search_web(query: str, max_results: int = 5) -> list[WebHit]:
     query = (query or "").strip()
     if not query:
         return []
-    log.info("web search | query=%s | max_results=%d", preview(query, 120), max_results)
+    log.info("web search | query=%s | max_results=%d", preview(query), max_results)
 
     try:
         hits = _search_lite(query, max_results)
         if hits:
-            log.info("web search done (lite) | %d hits | %s", len(hits), preview(hits[0].url, 100))
+            log.info("web search done (lite) | %d hits | %s", len(hits), preview(hits[0].url))
             return hits
         log.warning("web search (lite) returned no hits, falling back to ddgs")
     except Exception as exc:
         log.warning(
             "web search (lite) failed | %s: %s",
             type(exc).__name__,
-            preview(exc, 200),
+            preview(exc),
         )
 
     # Fallback: try the ddgs library with multiple backends.
@@ -85,7 +83,7 @@ def search_web(query: str, max_results: int = 5) -> list[WebHit]:
                 "web search backend %s failed | %s: %s",
                 backend,
                 type(exc).__name__,
-                preview(exc, 150),
+                preview(exc),
             )
             continue
     if last_error is not None:

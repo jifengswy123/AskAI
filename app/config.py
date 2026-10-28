@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 
 MODEL = os.getenv("ASKAI_MODEL", "qwen2.5:1.5b")

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import time
 from dataclasses import dataclass
 
@@ -81,7 +79,7 @@ def connect() -> MilvusClient:
 def search(query: str, top_k: int | None = None) -> list[Hit]:
     client = connect()
     top_k = top_k or QA_TOP_K
-    log.info("milvus search | top_k=%d metric=%s query=%s", top_k, MILVUS_METRIC, preview(query, 120))
+    log.info("milvus search | top_k=%d metric=%s query=%s", top_k, MILVUS_METRIC, preview(query))
 
     vector = embed_query(query)
     started = time.perf_counter()

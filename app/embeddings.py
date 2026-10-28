@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import time
 
 from app.config import EMBEDDING_DIM, EMBEDDING_MODEL
@@ -14,7 +12,7 @@ def embed_query(text: str) -> list[float]:
     if not text:
         raise ValueError("embedding请求为空，请重新输入")
 
-    log.info("开始进行向量化 | model=%s | %s", EMBEDDING_MODEL, preview(text, 120))
+    log.info("开始进行向量化 | model=%s | %s", EMBEDDING_MODEL, preview(text))
     started = time.perf_counter()
     try:
         resp = client().embeddings.create(model=EMBEDDING_MODEL, input=text)

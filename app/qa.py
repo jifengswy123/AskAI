@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 import time
 from typing import Iterator
@@ -18,16 +16,16 @@ _SOURCE_TAG_OPEN = "<source>"
 
 NO_HIT_NOTICE = "知识库中没有检索到相关内容，请先把相关知识写入 Milvus。"
 
-
+#知识问答非流式输出，此方法用于应用内输出格式化Json信息，便于应用内其他方法解析
 def answer_question(question: str) -> dict:
     question = (question or "").strip()
-    log.info("QA question | %s", preview(question, 200))
+    log.info("用户问题（非流式输出方法）：%s", preview(question))
     if not question:
         raise ValueError("问题不能为空")
-
+    #获取Top-k条最相关的Milvus结果
     hits = search(question, top_k=QA_TOP_K)
     if not hits:
-        log.warning("QA found no hits, returning empty-answer notice")
+        log.warning("用户问题未命中, 返回空")
         return {
             "question": question,
             "answer": NO_HIT_NOTICE,
@@ -45,6 +43,7 @@ def answer_question(question: str) -> dict:
                     "先选出最相关的一段（rank 从 1 开始）。"
                     "回答时把资料里的步骤、路径、命令原样整理成条目，允许改写通顺，但禁止补充资料没有的菜单、按钮或参数。"
                     "可吸收其他段落中不矛盾的补充。"
+                    "其他段落中的内容与用户问题不相关时，舍弃其他段落中的内容。"
                     "资料不足时明确说明缺什么。"
                     "只输出 JSON。"
                 ),
@@ -66,7 +65,7 @@ def answer_question(question: str) -> dict:
         "QA answer | best_rank=%s | %d chars | %s",
         best_rank,
         len(answer),
-        preview(answer, 200),
+        preview(answer),
     )
     return {
         "question": question,
@@ -75,21 +74,20 @@ def answer_question(question: str) -> dict:
         "sources": [h.to_dict() for h in hits],
     }
 
-
+#知识问答流式输出，用于前端页面输出
 def answer_question_stream(question: str) -> Iterator[dict]:
-    """Stream the answer: sources first, then text deltas, then the final payload."""
     question = (question or "").strip()
-    log.info("QA stream question | %s", preview(question, 200))
+    log.info("用户问题（流式输出方法）：%s", preview(question))
     if not question:
         raise ValueError("问题不能为空")
 
     started = time.perf_counter()
     hits = search(question, top_k=QA_TOP_K)
-    log.info("QA stream retrieved | %d hits | %.2fs", len(hits), time.perf_counter() - started)
+    log.info("开始进入知识问答流式输出向量检索 | %d hits | %.2fs", len(hits), time.perf_counter() - started)
     yield {"type": "sources", "question": question, "sources": [h.to_dict() for h in hits]}
 
     if not hits:
-        log.warning("QA stream found no hits")
+        log.warning("知识问答流式输出未命中知识库数据")
         yield {"type": "token", "text": NO_HIT_NOTICE}
         yield {
             "type": "done",
@@ -105,9 +103,11 @@ def answer_question_stream(question: str) -> Iterator[dict]:
             "role": "system",
             "content": (
                 "你是 Linux 中间件与 AI 学习笔记助手。"
-                "严格根据检索到的资料回答，只能使用资料中的事实。"
-                "资料里的步骤、路径、命令原样保留，禁止补充资料没有的菜单、按钮或参数。"
-                "资料不足时直接说明缺什么。"
+                    "根据检索到的资料回答用户，只能使用资料中的事实。"
+                    "先选出最相关的一段（rank 从 1 开始）。"
+                    "回答时把资料里的步骤、路径、命令原样整理成条目，允许改写通顺，但禁止补充资料没有的菜单、按钮或参数。"
+                    "可吸收其他段落中不矛盾部分的补充。"
+                    "其他段落中的内容与用户问题不相关时，舍弃其他段落中的内容。"
             ),
         },
         {"role": "user", "content": _build_stream_prompt(question, hits)},
@@ -159,7 +159,7 @@ def answer_question_stream(question: str) -> Iterator[dict]:
         best_rank,
         len(answer),
         time.perf_counter() - started,
-        preview(answer, 200),
+        preview(answer),
     )
     yield {
         "type": "done",

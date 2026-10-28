@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import queue
 import threading
@@ -82,7 +80,7 @@ def health() -> dict:
 
 @app.post("/api/ask")
 def ask(body: QuestionIn) -> dict:
-    log.info("POST /api/ask | question=%s", preview(body.question, 200))
+    log.info("POST /api/ask | question=%s", preview(body.question))
     try:
         result = answer_question(body.question)
     except ValueError as exc:
@@ -102,7 +100,7 @@ def ask(body: QuestionIn) -> dict:
 @app.post("/api/ask/stream")
 def ask_stream(body: QuestionIn) -> StreamingResponse:
     """Same answer as /api/ask, but sources arrive first and the text streams."""
-    log.info("POST /api/ask/stream | question=%s", preview(body.question, 200))
+    log.info("POST /api/ask/stream | question=%s", preview(body.question))
 
     def gen():
         try:
@@ -126,7 +124,7 @@ def ask_stream(body: QuestionIn) -> StreamingResponse:
 
 @app.post("/api/compare")
 def compare(body: CompareIn) -> dict:
-    log.info("POST /api/compare | A=%s | B=%s", preview(body.term_a, 80), preview(body.term_b, 80))
+    log.info("POST /api/compare | A=%s | B=%s", preview(body.term_a), preview(body.term_b))
     try:
         result = compare_terms(body.term_a, body.term_b)
     except ValueError as exc:
@@ -148,8 +146,8 @@ def compare(body: CompareIn) -> dict:
 def compare_stream(body: CompareIn) -> StreamingResponse:
     log.info(
         "POST /api/compare/stream | A=%s | B=%s",
-        preview(body.term_a, 80),
-        preview(body.term_b, 80),
+        preview(body.term_a),
+        preview(body.term_b),
     )
 
     def gen():

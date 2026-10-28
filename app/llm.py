@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import re
 import time
@@ -31,7 +29,7 @@ def chat(messages: list[dict[str, str]], *, temperature: float | None = None) ->
         MODEL,
         temp,
         len(messages),
-        preview(_last_user(messages), 200),
+        preview(_last_user(messages)),
     )
     started = time.perf_counter()
     #调用大模型
@@ -42,15 +40,15 @@ def chat(messages: list[dict[str, str]], *, temperature: float | None = None) ->
             temperature=temp,
         )
     except Exception:
-        log.exception("LLM request failed after %.2fs", time.perf_counter() - started)
+        log.exception("大模型请求失败： %.2fs", time.perf_counter() - started)
         raise
 
     content = (resp.choices[0].message.content or "").strip()
     log.info(
-        "LLM reply | %.2fs | %d chars | %s",
+        "大模型回复：%.2fs | %d chars | %s",
         time.perf_counter() - started,
         len(content),
-        preview(content, 200),
+        preview(content),
     )
     return content
 
@@ -64,7 +62,7 @@ def stream_chat(
         MODEL,
         temp,
         len(messages),
-        preview(_last_user(messages), 200),
+        preview(_last_user(messages)),
     )
     started = time.perf_counter()
     first_token_at: float | None = None
@@ -76,6 +74,7 @@ def stream_chat(
             temperature=temp,
             stream=True,
         )
+        #从流式响应中取出choices列表
         for chunk in stream:
             choices = getattr(chunk, "choices", None) or []
             if not choices:
@@ -86,11 +85,11 @@ def stream_chat(
                 continue
             if first_token_at is None:
                 first_token_at = time.perf_counter() - started
-                log.info("LLM first token | %.2fs", first_token_at)
+                log.info("大模型输出首字时间： %.2fs", first_token_at)
             total += len(text)
             yield text
     except Exception:
-        log.exception("LLM stream failed after %.2fs", time.perf_counter() - started)
+        log.exception("知识问答流式输出失败 %.2fs", time.perf_counter() - started)
         raise
     log.info(
         "LLM stream done | %.2fs | ttft=%.2fs | %d chars",
@@ -99,21 +98,20 @@ def stream_chat(
         total,
     )
 
-
+#进行大模型输出json的校验
 def chat_json(
     messages: list[dict[str, str]],
     *,
     fallback: dict[str, Any] | None = None,
     temperature: float | None = None,
 ) -> dict[str, Any]:
-    """Ask the small local model for JSON and recover if it wraps it in markdown."""
     temp = LLM_TEMPERATURE if temperature is None else temperature
     log.debug(
         "LLM json request | model=%s temp=%s messages=%d | last_user=%s",
         MODEL,
         temp,
         len(messages),
-        preview(_last_user(messages), 200),
+        preview(_last_user(messages)),
     )
     started = time.perf_counter()
     try:
@@ -121,14 +119,14 @@ def chat_json(
             model=MODEL,
             messages=messages,
             temperature=temp,
-            response_format={"type": "json_object"},
+            response_format={"type": "json_object"}, #OpenAI的JSON Mode，强制模型输出Json
         )
         text = (resp.choices[0].message.content or "").strip()
     except Exception as exc:
         log.warning(
             "LLM json mode failed (%s: %s), retrying as plain chat",
             type(exc).__name__,
-            preview(exc, 200),
+            preview(exc),
         )
         text = chat(messages, temperature=temperature)
 
@@ -138,14 +136,14 @@ def chat_json(
         log.warning(
             "LLM json unparsable | %.2fs | raw=%s | using fallback",
             elapsed,
-            preview(text, 300),
+            preview(text),
         )
         return fallback or {}
     log.info(
         "LLM json reply | %.2fs | keys=%s | %s",
         elapsed,
         list(parsed.keys()),
-        preview(text, 200),
+        preview(text),
     )
     return parsed
 

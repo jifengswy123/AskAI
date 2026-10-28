@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import os
 import sys
@@ -11,12 +9,10 @@ _configured = False
 
 
 def setup_logging() -> None:
-    """Configure the ``askai`` logger once per process."""
     global _configured
     if _configured:
         return
 
-    # Windows consoles may default to GBK; force UTF-8 so Chinese logs stay readable.
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:  # pragma: no cover - non-reconfigurable stream
@@ -38,9 +34,5 @@ def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(f"askai.{name}")
 
 
-def preview(text: object, limit: int = 160) -> str:
-    """Single-line, length-limited rendering of text for log lines."""
-    flat = " ".join(str(text or "").split())
-    if len(flat) <= limit:
-        return flat
-    return flat[:limit] + "..."
+def preview(text: object) -> str:
+    return " ".join(str(text or "").split())

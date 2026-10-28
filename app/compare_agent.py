@@ -1,7 +1,3 @@
-"""Feature 2: Planner + Plan-and-Execute, with ReAct loops and a web-search agent."""
-
-from __future__ import annotations
-
 from collections.abc import Callable, Iterator
 from typing import Any
 
@@ -25,7 +21,7 @@ def compare_terms(
 ) -> dict:
     a = (term_a or "").strip()
     b = (term_b or "").strip()
-    log.info("开始比较 | 关键字A=%s | 关键字B=%s", preview(a, 80), preview(b, 80))
+    log.info("开始比较 | 关键字A=%s | 关键字B=%s", preview(a), preview(b))
     if not a or not b:
         raise ValueError("两个专有名词都不能为空")
 
@@ -39,8 +35,8 @@ def compare_terms(
     plan = _plan(a, b)
     log.info(
         "计划已生成 | goal=%s | steps=%s",
-        preview(plan.get("goal"), 100),
-        [(s.get("id"), s.get("action"), preview(s.get("query"), 60)) for s in plan.get("steps") or []],
+        preview(plan.get("goal")),
+        [(s.get("id"), s.get("action"), preview(s.get("query"))) for s in plan.get("steps") or []],
     )
     emit({"type": "plan", "title": "Planner 生成执行计划", "plan": plan})
 
@@ -50,7 +46,7 @@ def compare_terms(
     for step in plan.get("steps") or []:
         action = str(step.get("action") or "")
         query = str(step.get("query") or "")
-        log.info("step %s | action=%s | query=%s", step.get("id"), action, preview(query, 100))
+        log.info("步骤 %s | 动作=%s | query=%s", step.get("id"), action, preview(query))
         thought = _think(a, b, step, milvus_hits, web_hits)
         emit({"type": "thought", "title": "ReAct Thought", "content": thought})
 
@@ -73,7 +69,7 @@ def compare_terms(
     log.info(
         "judge | enough=%s | reason=%s",
         bool(judge.get("enough")),
-        preview(judge.get("reason"), 150),
+        preview(judge.get("reason")),
     )
     emit(
         {
@@ -89,7 +85,7 @@ def compare_terms(
     while not judge.get("enough") and round_i < MAX_WEB_ROUNDS and not web_failed:
         round_i += 1
         query = _safe_web_query(judge.get("next_query"), a, b, round_i)
-        log.info("web round %d/%d | query=%s", round_i, MAX_WEB_ROUNDS, preview(query, 120))
+        log.info("web round %d/%d | query=%s", round_i, MAX_WEB_ROUNDS, preview(query))
         thought = (
             f"Milvus 中的笔记还不够。第 {round_i} 轮调用网络搜索 Agent，查询：{query}"
         )
@@ -102,7 +98,7 @@ def compare_terms(
             log.warning(
                 "web search failed, continuing with notes only | %s: %s",
                 type(exc).__name__,
-                preview(exc, 200),
+                preview(exc),
             )
             emit(
                 {
@@ -141,7 +137,7 @@ def compare_terms(
             "judge after web round %d | enough=%s | reason=%s",
             round_i,
             bool(judge.get("enough")),
-            preview(judge.get("reason"), 150),
+            preview(judge.get("reason")),
         )
         emit(
             {
@@ -170,7 +166,7 @@ def compare_terms(
         len(milvus_hits),
         len(web_hits),
         bool(judge.get("enough")),
-        preview(result.get("comparison"), 200),
+        preview(result.get("comparison")),
     )
     emit({"type": "answer", "title": "最终对比", "content": result.get("comparison", "")})
 
